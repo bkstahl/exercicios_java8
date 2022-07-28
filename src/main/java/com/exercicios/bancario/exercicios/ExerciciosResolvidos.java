@@ -29,8 +29,8 @@ public class ExerciciosResolvidos {
 	 */
 	public static void main(String[] args) {
 
-		imprimirNomesClientes();
-		//imprimirMediaSaldos();
+		//imprimirNomesClientes();
+		imprimirMediaSaldos();
 		//imprimirPaisClienteMaisRico();
 		//imprimirSaldoMedio(1);
 		//imprimirClientesComPoupanca();
@@ -76,7 +76,7 @@ public class ExerciciosResolvidos {
 					.filter(conta -> conta.getClient().getName().equals(cliente.getName()))
 					.mapToDouble(conta -> conta.getBalance())
 					.average()
-					.getAsDouble();
+					.orElse(0);
 
 			System.out.println(cliente.getName() + " - " + media);
 		});
