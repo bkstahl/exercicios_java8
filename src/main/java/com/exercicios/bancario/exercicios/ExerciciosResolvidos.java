@@ -30,8 +30,8 @@ public class ExerciciosResolvidos {
 	public static void main(String[] args) {
 
 		//imprimirNomesClientes();
-		imprimirMediaSaldos();
-		//imprimirPaisClienteMaisRico();
+		//imprimirMediaSaldos();
+		imprimirPaisClienteMaisRico();
 		//imprimirSaldoMedio(1);
 		//imprimirClientesComPoupanca();
 		//getEstadoClientes(1);
@@ -88,6 +88,7 @@ public class ExerciciosResolvidos {
 	 * com o maior saldo somando todas as suas contas.
 	 */
 	public static void imprimirPaisClienteMaisRico() {
+		
 		double sumClientBrazil = 
 				service
 				.listAccounts()
@@ -104,7 +105,6 @@ public class ExerciciosResolvidos {
 				.sum();
 
 		System.out.println(Double.compare(sumClientBrazil, sumClienteUSA));
-
 	}
 
 	/**
@@ -121,7 +121,6 @@ public class ExerciciosResolvidos {
 				.average()
 				.getAsDouble();
 		System.out.println(average);
-
 	}
 
 	/**
@@ -131,9 +130,10 @@ public class ExerciciosResolvidos {
 		service
 		.listAccounts()
 		.stream()
-		.filter(conta -> conta.getType().equals("SAVING"))
+		.filter(conta -> conta.getType().equals(AccountEnum.SAVING))
 		.map(conta -> conta.getClient())
 		.distinct()
+		.map(cliente -> cliente.getName())
 		.forEach(System.out::println);
 	}
 
