@@ -2,6 +2,8 @@ package com.exercicios.bancario.exercicios;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -9,6 +11,7 @@ import com.exercicios.bancario.entity.Account;
 import com.exercicios.bancario.entity.AccountEnum;
 import com.exercicios.bancario.entity.Client;
 import com.exercicios.bancario.mock.BankService;
+import com.exercicios.bancario.mock.MaxAccountCountryBean;
 import com.exercicios.bancario.mock.ServiceFactory;
 
 /**
@@ -31,7 +34,7 @@ public class ExerciciosResolvidos {
 
 		//imprimirNomesClientes();
 		//imprimirMediaSaldos();
-		imprimirPaisClienteMaisRico();
+		imprimirPaisClienteMaisRico(); 
 		//imprimirSaldoMedio(1);
 		//imprimirClientesComPoupanca();
 		//getEstadoClientes(1);
@@ -65,48 +68,48 @@ public class ExerciciosResolvidos {
 	 * Victor Lira - 352
 	 */
 	public static void imprimirMediaSaldos() {
-		service
-		.listClients()
+		service.listClients()
 		.stream()
-		.forEach(cliente -> {
-			double media = 
-					service
-					.listAccounts()
-					.stream()
-					.filter(conta -> conta.getClient().getName().equals(cliente.getName()))
-					.mapToDouble(conta -> conta.getBalance())
-					.average()
-					.orElse(0);
-
-			System.out.println(cliente.getName() + " - " + media);
-		});
+		.map(c ->
+		String.join(
+				" - ",
+				c.getName(),
+				String.valueOf(c.getAccounts().stream().mapToDouble(Account::getBalance).average().orElse(0))
+				)
+				).forEach(System.out::println);
 	}
 
 	/**
-	 * 3. Considerando que só existem os países "Brazil" e "United States", 
-	 * imprima na tela qual deles possui o cliente mais rico, ou seja,
-	 * com o maior saldo somando todas as suas contas.
+	 * 3. Considerando que só existem os países "Brazil" e "United States", imprima
+	 * na tela qual deles possui o cliente mais rico, ou seja, com o maior saldo
+	 * somando todas as suas contas.
 	 */
 	public static void imprimirPaisClienteMaisRico() {
-		
-		double sumClientBrazil = 
-				service
-				.listAccounts()
-				.stream()
-				.filter(conta -> conta.getClient().getAddress().getCountry().equals("Brazil"))
-				.mapToDouble(conta -> conta.getBalance())
-				.sum();
-		double sumClienteUSA = 
-				service
-				.listAccounts()
-				.stream()
-				.filter(conta -> conta.getClient().getAddress().getCountry().equals("United States"))
-				.mapToDouble(conta -> conta.getBalance())
-				.sum();
+		Map<Object, List<Client>> grouped = service.listClients().stream()
+				.collect(Collectors.groupingBy((client) -> client.getAddress().getCountry()));
 
-		System.out.println(Double.compare(sumClientBrazil, sumClienteUSA));
+		MaxAccountCountryBean maxAccountCountry = new MaxAccountCountryBean();
+		List<MaxAccountCountryBean> listCountriesWithMaxBalance = new ArrayList<>();
+
+		grouped.keySet().stream().forEach((country) -> {
+			Double maxAccount = grouped.get(country).stream().mapToDouble((c) -> getSumAccounts(c.getAccounts())).max()
+					.orElse(0);
+			if (maxAccount > maxAccountCountry.getMaxValueAccount()) {
+				maxAccountCountry.setCountry(String.valueOf(country));
+				maxAccountCountry.setMaxValueAccount(maxAccount);
+			}
+			listCountriesWithMaxBalance.add(new MaxAccountCountryBean(String.valueOf(country), maxAccount));
+		});
+
+		listCountriesWithMaxBalance.forEach(System.out::println);
+
+		System.out.print(maxAccountCountry);
 	}
 
+	private static Double getSumAccounts(List<Account> accounts) {
+		return accounts.stream().mapToDouble(Account::getBalance).sum();
+	}
+	
 	/**
 	 * 4. Imprime na tela o saldo médio das contas da agência
 	 * @param agency
